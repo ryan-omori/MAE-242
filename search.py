@@ -176,7 +176,15 @@ def manhattanHeuristic(state,goal):
    """
    return abs(state[0] - goal[0]) + abs(state[1] - goal[1])
 
-def aStarSearch(xI,xG,n,m,O,heuristic=manhattanHeuristic):
+def euclideanHeuristic(state,goal):
+   """
+   A heuristic function estimates the cost from the current state to the nearest
+   goal.  This heuristic is trivial.
+
+   """
+   return ((state[0] - goal[0])**2 + (state[1] - goal[1])**2)**0.5
+
+def aStarSearch(xI,xG,n,m,O,heuristic):
   "Search the node that has the lowest combined cost and heuristic first."
   """The function uses a function heuristic as an argument. We have used
   the null heuristic here first, you should redefine heuristics as part of 
@@ -245,9 +253,10 @@ if __name__ == '__main__':
     #collided = collisionCheck(x,u,testObs)
     #print('Collision!' if collided else 'No collision!')
     
-    # Sample path plotted to goal
+    # Inital and Goal States
     xI = (1,1)
-    xG = (20,2)
+    xG = (34,16)
+    
     #actions = [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),
     #           (1,0),(1,0),(1,0),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
     #path = getPathFromActions(xI,actions)
@@ -255,18 +264,12 @@ if __name__ == '__main__':
     
     #Call DFS Alg
     actions_dfs, cost_dfs, nodes_dfs = depthFirstSearch(xI, xG, n, m, O)
-    #print('DFS Actions:', actions_dfs)
-    #print('DFS Cost:', cost_dfs)
-    #print('Nodes Explored:', nodes_dfs)
     path_dfs = getPathFromActions(xI, actions_dfs)
     showPath(xI, xG, path_dfs, n, m, O)
     plt.title("DFS Path")
     
     #Call BFS Alg
     actions_bfs, cost_bfs, nodes_bfs = breadthFirstSearch(xI, xG, n, m, O)
-    #print('DFS Actions:', actions_bfs)
-    #print('DFS Cost:', cost_bfs)
-    #print('Nodes Explored:', nodes_bfs)
     path_bfs = getPathFromActions(xI, actions_bfs)
     showPath(xI, xG, path_bfs, n, m, O)
     plt.title("BFS Path")
@@ -287,27 +290,46 @@ if __name__ == '__main__':
     showPath(xI, xG, path_dijk_e, n, m, O)
     plt.title("Dijkstra East Cost Path")
 
-    # A*
+    # Call A* Manhattan
     actions_astar, cost_astar, nodes_astar = aStarSearch(xI, xG, n, m, O, manhattanHeuristic)
     path_Astar=getPathFromActions(xI, actions_astar)
     showPath(xI, xG, path_Astar, n, m, O)
     plt.title("A^ Cost Path")
     plt.show()
-    
-    # Cost of that path with various cost functions
-    simplecost = getCostOfActions(xI,actions_bfs,O)
-    westcost = stayWestCost(xI,actions_bfs,O)
-    eastcost = stayEastCost(xI,actions_bfs,O)
-    print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
-          (simplecost,westcost,eastcost))
-    
+
+    # Call A* Euclidean
+    actions_astar, cost_astar, nodes_astar = aStarSearch(xI, xG, n, m, O, euclideanHeuristic)
+    path_Astar=getPathFromActions(xI, actions_astar)
+    showPath(xI, xG, path_Astar, n, m, O)
+    plt.title("A^ Cost Path")
+    plt.show()
 
     # Cost of DFS
     simplecostdfs = getCostOfActions(xI,actions_dfs,O)
     westcostdfs = stayWestCost(xI,actions_dfs,O)
     eastcostdfs = stayEastCost(xI,actions_dfs,O)
+    print('DFS Actions:', actions_dfs)
+    print('DFS Cost:', cost_dfs)
+    print('Nodes Explored:', nodes_dfs)
+    
+    # Cost of BFS
+    simplecostbfs = getCostOfActions(xI,actions_bfs,O)
+    westcostbfs = stayWestCost(xI,actions_bfs,O)
+    eastcostbfs = stayEastCost(xI,actions_bfs,O)
+    print('BFS Actions:', actions_bfs)
+    print('BFS Cost:', cost_bfs)
+    print('Nodes Explored:', nodes_bfs)
+    
+    # Cost of Dijkstra West
+    simplecostdijw = getCostOfActions(xI,actions_dijk_w,O)
+    westcostdijw = stayWestCost(xI,actions_dijk_w,O)
+    eastcostdijw = stayEastCost(xI,actions_dijk_w,O)
     print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
-          (simplecostdfs,westcostdfs,eastcostdfs))
+          (simplecostdijw,westcostdijw,eastcostdijw))
     
-    
-    
+    # Cost of Dijkstra East
+    simplecostdije = getCostOfActions(xI,actions_dijk_e,O)
+    westcostdije = stayWestCost(xI,actions_dijk_e,O)
+    eastcostdije = stayEastCost(xI,actions_dijk_e,O)
+    print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
+          (simplecostdije,westcostdije,eastcostdije))
