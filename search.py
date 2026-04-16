@@ -256,80 +256,71 @@ if __name__ == '__main__':
     # Inital and Goal States
     xI = (1,1)
     xG = (34,16)
+    #xG = (20,1)
     
     #actions = [(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0),(0,1),
     #           (1,0),(1,0),(1,0),(0,-1),(1,0),(1,0),(1,0),(1,0),(1,0),(1,0)]
     #path = getPathFromActions(xI,actions)
     #showPath(xI,xG,path,n,m,O)
     
-    #Call DFS Alg
+    #DFS Path and Cost
     actions_dfs, cost_dfs, nodes_dfs = depthFirstSearch(xI, xG, n, m, O)
     path_dfs = getPathFromActions(xI, actions_dfs)
     showPath(xI, xG, path_dfs, n, m, O)
+    simplecostdfs = getCostOfActions(xI,actions_dfs,O)
+    print('DFS Actions:', actions_dfs)
+    print('DFS Cost:', cost_dfs)
+    print('Nodes Explored:', nodes_dfs)
     plt.title("DFS Path")
     
-    #Call BFS Alg
+    #BFS Path and Cost
     actions_bfs, cost_bfs, nodes_bfs = breadthFirstSearch(xI, xG, n, m, O)
     path_bfs = getPathFromActions(xI, actions_bfs)
     showPath(xI, xG, path_bfs, n, m, O)
+    simplecostbfs = getCostOfActions(xI,actions_bfs,O)
+    print('BFS Actions:', actions_bfs)
+    print('BFS Cost:', cost_bfs)
+    print('Nodes Explored:', nodes_bfs)
     plt.title("BFS Path")
     
-    # Dijkstra with west cost
+    # Call Dijkstra with west cost
     actions_dijk_w, cost_dijk_w, nodes_dijk_w = DijkstraSearch(xI, xG, n, m, O, stayWestCost)
-    #print('Dijkstra West Cost:', cost_dijk_w)
-    #print('Dijkstra West Nodes:', nodes_dijk_w)
     path_dijk_w = getPathFromActions(xI, actions_dijk_w)
     showPath(xI, xG, path_dijk_w, n, m, O)
     plt.title("Dijkstra West Cost Path")
 
-    # Dijkstra with east cost
+    # Call Dijkstra with east cost
     actions_dijk_e, cost_dijk_e, nodes_dijk_e = DijkstraSearch(xI, xG, n, m, O, stayEastCost)
-    #print('Dijkstra East Cost:', cost_dijk_e)
-    #print('Dijkstra East Nodes:', nodes_dijk_e)
     path_dijk_e = getPathFromActions(xI, actions_dijk_e)
     showPath(xI, xG, path_dijk_e, n, m, O)
     plt.title("Dijkstra East Cost Path")
+    
+    # Cost of Dijkstra West
+    westcostdij = stayWestCost(xI,actions_dijk_w,O)
+    eastcostdij = stayEastCost(xI,actions_dijk_e,O)
+    print('Dijkstra stay west cost was %d and stay east cost was %d' %
+          (westcostdij,eastcostdij))
 
     # Call A* Manhattan
     actions_astar, cost_astar, nodes_astar = aStarSearch(xI, xG, n, m, O, manhattanHeuristic)
     path_Astar=getPathFromActions(xI, actions_astar)
     showPath(xI, xG, path_Astar, n, m, O)
-    plt.title("A^ Cost Path")
-    plt.show()
+    plt.title("$A^*$ Cost Path with Manhattan")
+    
 
     # Call A* Euclidean
-    actions_astar, cost_astar, nodes_astar = aStarSearch(xI, xG, n, m, O, euclideanHeuristic)
-    path_Astar=getPathFromActions(xI, actions_astar)
-    showPath(xI, xG, path_Astar, n, m, O)
-    plt.title("A^ Cost Path")
-    plt.show()
+    actions_astare, cost_astare, nodes_astare = aStarSearch(xI, xG, n, m, O, euclideanHeuristic)
+    path_Astare=getPathFromActions(xI, actions_astare)
+    showPath(xI, xG, path_Astare, n, m, O)
+    plt.title("$A^*$ Cost Path with Euclidean")
+    
 
-    # Cost of DFS
-    simplecostdfs = getCostOfActions(xI,actions_dfs,O)
-    westcostdfs = stayWestCost(xI,actions_dfs,O)
-    eastcostdfs = stayEastCost(xI,actions_dfs,O)
-    print('DFS Actions:', actions_dfs)
-    print('DFS Cost:', cost_dfs)
-    print('Nodes Explored:', nodes_dfs)
+    # Cost of A* 
+    A_man=getCostOfActions(xI,actions_astar,O)
+    A_euc=getCostOfActions(xI,actions_astare,O)
+    print('A* with Manhattan Heuristic cost was %d' %
+          (A_man))
+    print('A* with Euclidean Heuristic cost was %d' %
+          (A_euc))
     
-    # Cost of BFS
-    simplecostbfs = getCostOfActions(xI,actions_bfs,O)
-    westcostbfs = stayWestCost(xI,actions_bfs,O)
-    eastcostbfs = stayEastCost(xI,actions_bfs,O)
-    print('BFS Actions:', actions_bfs)
-    print('BFS Cost:', cost_bfs)
-    print('Nodes Explored:', nodes_bfs)
-    
-    # Cost of Dijkstra West
-    simplecostdijw = getCostOfActions(xI,actions_dijk_w,O)
-    westcostdijw = stayWestCost(xI,actions_dijk_w,O)
-    eastcostdijw = stayEastCost(xI,actions_dijk_w,O)
-    print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
-          (simplecostdijw,westcostdijw,eastcostdijw))
-    
-    # Cost of Dijkstra East
-    simplecostdije = getCostOfActions(xI,actions_dijk_e,O)
-    westcostdije = stayWestCost(xI,actions_dijk_e,O)
-    eastcostdije = stayEastCost(xI,actions_dijk_e,O)
-    print('Basic cost was %d, stay west cost was %d, stay east cost was %d' %
-          (simplecostdije,westcostdije,eastcostdije))
+    plt.show()
