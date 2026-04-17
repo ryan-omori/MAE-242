@@ -318,9 +318,9 @@ if __name__ == '__main__':
     # Cost of A* 
     A_man=getCostOfActions(xI,actions_astar,O)
     A_euc=getCostOfActions(xI,actions_astare,O)
-    print('A* with Manhattan Heuristic cost was %d' %
-          (A_man))
-    print('A* with Euclidean Heuristic cost was %d' %
-          (A_euc))
+    print('A* with Manhattan Heuristic cost was %d. Nodes Explored: %d.' %
+          (A_man, nodes_astar))
+    print('A* with Euclidean Heuristic cost was %d. Nodes Explored: %d.' %
+          (A_euc,nodes_astare))
     
     plt.show()
