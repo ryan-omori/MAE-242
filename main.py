@@ -104,32 +104,56 @@ def valueIteration(gamma, eta, grid):
     iterations = 0                              # No. of iterations
 
     # ------- Your code goes here -------
-    # while (...)
+    while True:
+        delta = 0
+        for s in grid.states:
+            v_old = V[s]
+            values = [expectedValue(P, V, s, a, gamma, grid) for a in range(grid.n_a)]
+            V[s] = max(values)
+            pi[s] = np.argmax(values)
+            delta = max(delta, abs(v_old - V[s]))
+        iterations += 1
+        if delta < tolerance:
+            break
 
     return V, pi, iterations
 
 
 def policyIteration(gamma, eta, grid):
-    """Implement (offline) policy iteration with a discount factor
-    `gamma` and noise probability `eta`.
-
-    Output:
-    `V`: Value function, numpy array of (n,m) dimensions
-    `pi`: Policy, numpy array of (n,m) dimensions
-
-    """
     P = transitionMatrix(grid, eta)
 
-    tolerance = 1e-3                            # Tolerance for evaluation
-    V = np.zeros([grid.n, grid.m])              # Value function
-    pi = np.zeros([grid.n, grid.m], dtype=int)  # Policy
-    i_imprv = 0                                 # No. of improvement iterations
-    i_eval = 0                                  # No. of evaluation iterations
+    tolerance = 1e-3
+    V = np.zeros([grid.n, grid.m])
+    pi = np.zeros([grid.n, grid.m], dtype=int)
+    i_imprv = 0
+    i_eval = 0
 
     # ------- Your code goes here -------
-    # while (...)
+    while True:
+        # ---- Policy Evaluation ----
+        delta = np.inf
+        while delta >= tolerance:
+            delta = 0
+            for s in grid.states:
+                v = V[s]
+                V[s] = expectedValue(P, V, s, pi[s], gamma, grid)
+                delta = max(delta, abs(v - V[s]))
+            i_eval += 1
 
-    return V, pi, i_eval, i_imprv
+        # ---- Policy Improvement ----
+        policy_stable = True
+        for s in grid.states:
+            add_action = pi[s]
+            pi[s] = np.argmax([
+                expectedValue(P, V, s, a, gamma, grid)
+                for a in range(grid.n_a)
+            ])
+            if add_action != pi[s]:
+                policy_stable = False
+        i_imprv += 1
+
+        if policy_stable:
+            return V, pi, i_eval, i_imprv
 
 
 ############################################################################
@@ -209,7 +233,7 @@ if __name__ == '__main__':
 # results of your algorithms.
 ############################################################################
 
-    if False:  # Change this to true to see the output
+    if True:  # Change this to true to see the output
         # Example policy and value function
         V = np.random.rand(mediumGrid.n, mediumGrid.m)
         pi = np.ones((mediumGrid.n, mediumGrid.m), dtype=int)  # Always up
@@ -233,3 +257,4 @@ if __name__ == '__main__':
         # Plot a noisy path from the start node under policy pi
         path = mediumGrid.getRandomPathFromPolicy(pi, eta)
         mediumGrid.plotPath(path, show=True)
+    plt.show()
