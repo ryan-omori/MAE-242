@@ -235,8 +235,8 @@ if __name__ == '__main__':
 
     if True:  # Change this to true to see the output
         # Example policy and value function
-        V = np.random.rand(mediumGrid.n, mediumGrid.m)
-        pi = np.ones((mediumGrid.n, mediumGrid.m), dtype=int)  # Always up
+        #V = np.random.rand(mediumGrid.n, mediumGrid.m)
+        #pi = np.ones((mediumGrid.n, mediumGrid.m), dtype=int)  # Always up
 
         # Plot the empty grid with start, goal, and penalty locations marked
         # To plot on the small grid instead, use smallGrid.plot
