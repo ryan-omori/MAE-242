@@ -170,7 +170,7 @@ params = {
     'b': [0.9, 0.2],
     # For parts c and d, fill in the values of gamma and eta that
     # result in the desired behavior
-    'c': [0.9, 0.2],
+    'c': [0.5, 0.1],
     'd1': [0.9, 0.2],
     'd2': [0.9, 0.2],
     'd3': [0.9, 0.2],
@@ -202,6 +202,10 @@ if __name__ == '__main__':
     V, pi, _ = valueIteration(gamma, eta, mediumGrid)
 
     print(f"Part (c): gamma: {gamma} , eta: {eta}.")
+    
+    # Add these to verify:
+    mediumGrid.printPolicy(pi)
+    mediumGrid.printValues(V)
 
     # ---------- Part (d) ----------- #
     # Change the values in `params` above to get the desired behavior
@@ -248,7 +252,7 @@ if __name__ == '__main__':
 
         # Plot the value function (red is low, green is high)
         mediumGrid.plotValues(V, show=True)
-
+        
         # Plot a noise-free path from the start node under policy pi
         # Note that these paths won't look good until you compute a good policy
         path = mediumGrid.getNominalPathFromPolicy(pi)
@@ -257,4 +261,3 @@ if __name__ == '__main__':
         # Plot a noisy path from the start node under policy pi
         path = mediumGrid.getRandomPathFromPolicy(pi, eta)
         mediumGrid.plotPath(path, show=True)
-    plt.show()
