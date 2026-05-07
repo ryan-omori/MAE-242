@@ -171,10 +171,10 @@ params = {
     # For parts c and d, fill in the values of gamma and eta that
     # result in the desired behavior
     'c': [0.5, 0.1],
-    'd1': [0.9, 0.2],
-    'd2': [0.9, 0.2],
-    'd3': [0.9, 0.2],
-    'd4': [0.9, 0.2],
+    'd1': [0.3, 0.0],  # Risking the Cliff
+    'd2': [0.3, 0.3],  # Avoiding the Cliff
+    'd3': [0.99, 0.0], # Risking the Cliff
+    'd4': [0.99, 0.5], # Avoiding the Cliff
 }
 
 if __name__ == '__main__':
@@ -204,8 +204,8 @@ if __name__ == '__main__':
     print(f"Part (c): gamma: {gamma} , eta: {eta}.")
     
     # Add these to verify:
-    mediumGrid.printPolicy(pi)
-    mediumGrid.printValues(V)
+    #mediumGrid.printPolicy(pi)
+    #mediumGrid.printValues(V)
 
     # ---------- Part (d) ----------- #
     # Change the values in `params` above to get the desired behavior
@@ -230,18 +230,45 @@ if __name__ == '__main__':
     gamma, eta = params['d4']
     print(f"Part (d) 4): gamma: {gamma}, eta: {eta}.")
     V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
-
+    
 ############################################################################
 # Part 4: In this final part we demonstrate some of the plotting and
 # printing functions available for visualizing and debugging the
 # results of your algorithms.
 ############################################################################
+    if True:
+        # ---- Part (c) ----
+        gamma, eta = params['c']
+        V, pi, _ = valueIteration(gamma, eta, mediumGrid)
 
-    if True:  # Change this to true to see the output
-        # Example policy and value function
-        #V = np.random.rand(mediumGrid.n, mediumGrid.m)
-        #pi = np.ones((mediumGrid.n, mediumGrid.m), dtype=int)  # Always up
+        mediumGrid.plotValues(V, show=False)
+        plt.title(f'Part (c): Value Function (gamma={gamma}, eta={eta})')
+        plt.show()
 
+        path = mediumGrid.getNominalPathFromPolicy(pi)
+        mediumGrid.plotPath(path, show=False)
+        plt.title(f'Part (c): Nominal Path (gamma={gamma}, eta={eta})')
+        plt.show()
+
+        # ---- Part (d) ----
+        labels = {
+            'd1': 'Close exit, risking cliff',
+            'd2': 'Close exit, avoiding cliff',
+            'd3': 'Far exit, risking cliff',
+            'd4': 'Far exit, avoiding cliff',
+        }
+        for key in ['d1', 'd2', 'd3', 'd4']:
+            gamma, eta = params[key]
+            V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
+            path = mediumGridBridge.getNominalPathFromPolicy(pi)
+            print(f"Part ({key}) path: {path}")
+            mediumGridBridge.printPolicy(pi)
+            mediumGridBridge.plotPath(path, show=False)
+            plt.title(f'Part ({key}): {labels[key]}  |  gamma={gamma}, eta={eta}')
+            plt.show()
+    if False:  # Change this to true to see the output
+        gamma, eta = params['c']
+        V, pi, _ = valueIteration(gamma, eta, mediumGrid)
         # Plot the empty grid with start, goal, and penalty locations marked
         # To plot on the small grid instead, use smallGrid.plot
         mediumGrid.plot(show=True)
@@ -261,3 +288,11 @@ if __name__ == '__main__':
         # Plot a noisy path from the start node under policy pi
         path = mediumGrid.getRandomPathFromPolicy(pi, eta)
         mediumGrid.plotPath(path, show=True)
+        
+        # ---- Part (d) plots - one per subpart ----
+        for key in ['d1', 'd2', 'd3', 'd4']:
+            gamma, eta = params[key]
+            V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
+            path = mediumGridBridge.getNominalPathFromPolicy(pi)
+            print(f"Part ({key}) path: {path}")
+            mediumGridBridge.plotPath(path, show=True)
