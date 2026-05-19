@@ -184,14 +184,16 @@ if __name__ == '__main__':
 
     gamma, eta = params['a']
     V, pi, i_eval, i_imprv = policyIteration(gamma, eta, smallGrid)
-
+    smallGrid.printValues(V)
+    smallGrid.printPolicy(pi)
     print(f"Part (a): {i_eval} evaluations and {i_imprv} improvements.")
 
     # ---------- Part (b) ----------- #
 
     gamma, eta = params['b']
     V, pi, iterations = valueIteration(gamma, eta, smallGrid)
-
+    smallGrid.printValues(V)
+    smallGrid.printPolicy(pi)
     print(f"Part (b): {iterations} iterations.")
 
     # ---------- Part (c) ----------- #
@@ -200,36 +202,34 @@ if __name__ == '__main__':
 
     gamma, eta = params['c']
     V, pi, _ = valueIteration(gamma, eta, mediumGrid)
-
+    mediumGrid.printValues(V)
+    mediumGrid.printPolicy(pi)
     print(f"Part (c): gamma: {gamma} , eta: {eta}.")
-    
-    # Add these to verify:
-    #mediumGrid.printPolicy(pi)
-    #mediumGrid.printValues(V)
 
     # ---------- Part (d) ----------- #
     # Change the values in `params` above to get the desired behavior
-    mediumGridBridge = MediumGridBridge()
+    mediumGrid = MediumGridBridge()
 
     # 1) Close exit, risking the cliff
     gamma, eta = params['d1']
     print(f"Part (d) 1): gamma: {gamma}, eta: {eta}.")
-    V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
+    V, pi, _ = valueIteration(gamma, eta,  mediumGrid)
 
     # 2) Close exit, avoiding the cliff
     gamma, eta = params['d2']
     print(f"Part (d) 2): gamma: {gamma}, eta: {eta}.")
-    V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
-
+    V, pi, _ = valueIteration(gamma, eta, mediumGrid)
+ 
     # 3) Far exit, risking the cliff
     gamma, eta = params['d3']
     print(f"Part (d) 3): gamma: {gamma}, eta: {eta}.")
-    V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
+    V, pi, _ = valueIteration(gamma, eta, mediumGrid)
+   
 
     # 4) Far exit, avoiding the cliff
     gamma, eta = params['d4']
     print(f"Part (d) 4): gamma: {gamma}, eta: {eta}.")
-    V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
+    V, pi, _ = valueIteration(gamma, eta, mediumGrid)
     
 ############################################################################
 # Part 4: In this final part we demonstrate some of the plotting and
@@ -259,40 +259,12 @@ if __name__ == '__main__':
         }
         for key in ['d1', 'd2', 'd3', 'd4']:
             gamma, eta = params[key]
-            V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
-            path = mediumGridBridge.getNominalPathFromPolicy(pi)
+            V, pi, _ = valueIteration(gamma, eta, mediumGrid)
+            path = mediumGrid.getNominalPathFromPolicy(pi)
             print(f"Part ({key}) path: {path}")
-            mediumGridBridge.printPolicy(pi)
-            mediumGridBridge.plotPath(path, show=False)
+            mediumGrid.printValues(V)
+            mediumGrid.printPolicy(pi)
+            mediumGrid.plotPath(path, show=False)
             plt.title(f'Part ({key}): {labels[key]}  |  gamma={gamma}, eta={eta}')
             plt.show()
-    if False:  # Change this to true to see the output
-        gamma, eta = params['c']
-        V, pi, _ = valueIteration(gamma, eta, mediumGrid)
-        # Plot the empty grid with start, goal, and penalty locations marked
-        # To plot on the small grid instead, use smallGrid.plot
-        mediumGrid.plot(show=True)
 
-        # Print a value function or policy to the terminal
-        mediumGrid.printValues(V)
-        mediumGrid.printPolicy(pi)
-
-        # Plot the value function (red is low, green is high)
-        mediumGrid.plotValues(V, show=True)
-        
-        # Plot a noise-free path from the start node under policy pi
-        # Note that these paths won't look good until you compute a good policy
-        path = mediumGrid.getNominalPathFromPolicy(pi)
-        mediumGrid.plotPath(path, show=True)
-
-        # Plot a noisy path from the start node under policy pi
-        path = mediumGrid.getRandomPathFromPolicy(pi, eta)
-        mediumGrid.plotPath(path, show=True)
-        
-        # ---- Part (d) plots - one per subpart ----
-        for key in ['d1', 'd2', 'd3', 'd4']:
-            gamma, eta = params[key]
-            V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
-            path = mediumGridBridge.getNominalPathFromPolicy(pi)
-            print(f"Part ({key}) path: {path}")
-            mediumGridBridge.plotPath(path, show=True)
