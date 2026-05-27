@@ -18,8 +18,6 @@ from grids import SmallGrid, MediumGrid, MediumGridBridge
 # taking an action `a` in state `s`. Both of these functions will be
 # helpful in implementing value iteration and policy iteration.
 ############################################################################
-
-
 def transitionMatrix(grid, eta):
     """Compute the transition matrix `P` for all states in `grid` with
     action error rate `eta`.
@@ -54,7 +52,6 @@ def transitionMatrix(grid, eta):
 
     return P
 
-
 def expectedValue(P, V, s, a, gamma, grid):
     """Compute the expected value of taking an action from a given state.
 
@@ -79,14 +76,11 @@ def expectedValue(P, V, s, a, gamma, grid):
     return sum(P[s_p][s][a] * (-grid.cost(s_p) + gamma*V[s_p])
                for s_p in s_primes)
 
-
 ############################################################################
 # Part 2: Now it's time to implement value iteration and policy
 # iteration. We have provided templates that show the basic structure
 # your code should follow.
 ############################################################################
-
-
 def valueIteration(gamma, eta, grid):
     """Implement value iteration with a discount factor `gamma` and
     noise probability `eta`.
@@ -99,48 +93,51 @@ def valueIteration(gamma, eta, grid):
     P = transitionMatrix(grid, eta)
 
     tolerance = 1e-3                            # Convergence error
-    V = np.zeros([grid.n, grid.m])              # Value function
+    V = np.zeros([grid.n, grid.m])              # Value function, all Zeros
+    #V = np.ones([grid.n, grid.m])              # all ones
+    #V = np.random.rand(grid.n, grid.m)         # random values
+    #V = np.full([grid.n, grid.m], 10.0)        # all tens
     pi = np.zeros([grid.n, grid.m], dtype=int)  # Policy
     iterations = 0                              # No. of iterations
 
-    # ------- Your code goes here -------
     while True:
         delta = 0
+        V_old = V.copy()                        # Synchronous sweep: snapshot V before updating
         for s in grid.states:
-            v_old = V[s]
-            values = [expectedValue(P, V, s, a, gamma, grid) for a in range(grid.n_a)]
+            # Compute expected value for each action and take the max (Bellman optimality)
+            values = [expectedValue(P, V_old, s, a, gamma, grid) for a in range(grid.n_a)]
             V[s] = max(values)
-            pi[s] = np.argmax(values)
-            delta = max(delta, abs(v_old - V[s]))
+            pi[s] = np.argmax(values)           # Greedy policy update
+            delta = max(delta, abs(V_old[s] - V[s]))
         iterations += 1
-        if delta < tolerance:
+        if delta < tolerance:                   # Convergence check
             break
 
     return V, pi, iterations
-
 
 def policyIteration(gamma, eta, grid):
     P = transitionMatrix(grid, eta)
 
     tolerance = 1e-3
-    V = np.zeros([grid.n, grid.m])
-    pi = np.zeros([grid.n, grid.m], dtype=int)
-    i_imprv = 0
-    i_eval = 0
+    V = np.zeros([grid.n, grid.m])              # Value function
+    pi = np.zeros([grid.n, grid.m], dtype=int)  # Policy, initialized to action 0
+    i_imprv = 0                                 # No. of improvement iterations
+    i_eval = 0                                  # No. of evaluation iterations
 
-    # ------- Your code goes here -------
     while True:
         # ---- Policy Evaluation ----
+        # Iteratively update V under the current fixed policy until convergence
         delta = np.inf
         while delta >= tolerance:
             delta = 0
+            V_old = V.copy()                    # Synchronous sweep: snapshot V before updating
             for s in grid.states:
-                v = V[s]
-                V[s] = expectedValue(P, V, s, pi[s], gamma, grid)
-                delta = max(delta, abs(v - V[s]))
+                V[s] = expectedValue(P, V_old, s, pi[s], gamma, grid)
+                delta = max(delta, abs(V_old[s] - V[s]))
             i_eval += 1
 
         # ---- Policy Improvement ----
+        # Update policy greedily based on current value function
         policy_stable = True
         for s in grid.states:
             add_action = pi[s]
@@ -148,13 +145,12 @@ def policyIteration(gamma, eta, grid):
                 expectedValue(P, V, s, a, gamma, grid)
                 for a in range(grid.n_a)
             ])
-            if add_action != pi[s]:
+            if add_action != pi[s]:             # Check if policy changed
                 policy_stable = False
         i_imprv += 1
 
-        if policy_stable:
+        if policy_stable:                       # Terminate if policy did not change
             return V, pi, i_eval, i_imprv
-
 
 ############################################################################
 # Part 3: Here is where you will run your value and policy iteration
@@ -162,8 +158,6 @@ def policyIteration(gamma, eta, grid):
 # provided an outline of what functions you might call to help you
 # answer the questions.
 ############################################################################
-
-
 # Parameters for each subproblem, stored as [gamma, eta]
 params = {
     'a': [0.9, 0.2],
@@ -171,10 +165,10 @@ params = {
     # For parts c and d, fill in the values of gamma and eta that
     # result in the desired behavior
     'c': [0.5, 0.1],
-    'd1': [0.3, 0.0],  # Risking the Cliff
-    'd2': [0.3, 0.3],  # Avoiding the Cliff
-    'd3': [0.99, 0.0], # Risking the Cliff
-    'd4': [0.99, 0.5], # Avoiding the Cliff
+    'd1': [0.3, 0.0],  # Close Exit, Risking the Cliff
+    'd2': [0.3, 0.3],  # Close Exit, Avoiding the Cliff
+    'd3': [0.99, 0.0], # Far Exit, Risking the Cliff
+    'd4': [0.99, 0.5], # Far Exit, Avoiding the Cliff
 }
 
 if __name__ == '__main__':
@@ -184,14 +178,14 @@ if __name__ == '__main__':
 
     gamma, eta = params['a']
     V, pi, i_eval, i_imprv = policyIteration(gamma, eta, smallGrid)
-
+    smallGrid.printPolicy(pi)
     print(f"Part (a): {i_eval} evaluations and {i_imprv} improvements.")
 
     # ---------- Part (b) ----------- #
 
     gamma, eta = params['b']
     V, pi, iterations = valueIteration(gamma, eta, smallGrid)
-
+    smallGrid.printPolicy(pi)
     print(f"Part (b): {iterations} iterations.")
 
     # ---------- Part (c) ----------- #
@@ -204,8 +198,8 @@ if __name__ == '__main__':
     print(f"Part (c): gamma: {gamma} , eta: {eta}.")
     
     # Add these to verify:
-    #mediumGrid.printPolicy(pi)
-    #mediumGrid.printValues(V)
+    mediumGrid.printPolicy(pi)
+    mediumGrid.printValues(V)
 
     # ---------- Part (d) ----------- #
     # Change the values in `params` above to get the desired behavior
@@ -237,20 +231,18 @@ if __name__ == '__main__':
 # results of your algorithms.
 ############################################################################
     if True:
-        # ---- Part (c) ----
+        # ---- Part (c): Value Iteration on MediumGrid ----
         gamma, eta = params['c']
         V, pi, _ = valueIteration(gamma, eta, mediumGrid)
-
         mediumGrid.plotValues(V, show=False)
-        plt.title(f'Part (c): Value Function (gamma={gamma}, eta={eta})')
+        plt.title(f'Part (c): Value Function | gamma={gamma}, eta={eta}')
         plt.show()
-
         path = mediumGrid.getNominalPathFromPolicy(pi)
         mediumGrid.plotPath(path, show=False)
-        plt.title(f'Part (c): Nominal Path (gamma={gamma}, eta={eta})')
+        plt.title(f'Part (c): Nominal Path | gamma={gamma}, eta={eta}')
         plt.show()
 
-        # ---- Part (d) ----
+        # ---- Part (d): Value Iteration on MediumGridBridge ----
         labels = {
             'd1': 'Close exit, risking cliff',
             'd2': 'Close exit, avoiding cliff',
@@ -261,38 +253,7 @@ if __name__ == '__main__':
             gamma, eta = params[key]
             V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
             path = mediumGridBridge.getNominalPathFromPolicy(pi)
-            print(f"Part ({key}) path: {path}")
-            mediumGridBridge.printPolicy(pi)
+            #print(f"Part ({key}) path: {path}")
             mediumGridBridge.plotPath(path, show=False)
-            plt.title(f'Part ({key}): {labels[key]}  |  gamma={gamma}, eta={eta}')
+            plt.title(f'Part ({key}): {labels[key]} | gamma={gamma}, eta={eta}')
             plt.show()
-    if False:  # Change this to true to see the output
-        gamma, eta = params['c']
-        V, pi, _ = valueIteration(gamma, eta, mediumGrid)
-        # Plot the empty grid with start, goal, and penalty locations marked
-        # To plot on the small grid instead, use smallGrid.plot
-        mediumGrid.plot(show=True)
-
-        # Print a value function or policy to the terminal
-        mediumGrid.printValues(V)
-        mediumGrid.printPolicy(pi)
-
-        # Plot the value function (red is low, green is high)
-        mediumGrid.plotValues(V, show=True)
-        
-        # Plot a noise-free path from the start node under policy pi
-        # Note that these paths won't look good until you compute a good policy
-        path = mediumGrid.getNominalPathFromPolicy(pi)
-        mediumGrid.plotPath(path, show=True)
-
-        # Plot a noisy path from the start node under policy pi
-        path = mediumGrid.getRandomPathFromPolicy(pi, eta)
-        mediumGrid.plotPath(path, show=True)
-        
-        # ---- Part (d) plots - one per subpart ----
-        for key in ['d1', 'd2', 'd3', 'd4']:
-            gamma, eta = params[key]
-            V, pi, _ = valueIteration(gamma, eta, mediumGridBridge)
-            path = mediumGridBridge.getNominalPathFromPolicy(pi)
-            print(f"Part ({key}) path: {path}")
-            mediumGridBridge.plotPath(path, show=True)
