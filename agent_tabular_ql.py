@@ -8,21 +8,19 @@ import utils
 DEBUG = False
 
 GAMMA = 0.5  # discounted factor
-TRAINING_EP = .5  # epsilon-greedy parameter for training
+TRAINING_EP = 0.5  # epsilon-greedy parameter for training
 TESTING_EP = 0.05  # epsilon-greedy parameter for testing
 NUM_RUNS = 10
 NUM_EPOCHS = 200
 NUM_EPIS_TRAIN = 25  # number of episodes for training at each epoch
 NUM_EPIS_TEST = 50  # number of episodes for testing
-ALPHA = 10e-3 # learning rate for training
+ALPHA = 10e-1 # learning rate for training
 
 ACTIONS = framework.get_actions()
 OBJECTS = framework.get_objects()
 NUM_ACTIONS = len(ACTIONS)
 NUM_OBJECTS = len(OBJECTS)
 
-
-# pragma: coderesponse template
 def epsilon_greedy(state_1, state_2, q_func, epsilon):
     """Returns an action selected by an epsilon-Greedy exploration policy
 
@@ -34,7 +32,6 @@ def epsilon_greedy(state_1, state_2, q_func, epsilon):
     Returns:
         (int, int): the indices describing the action/object to take
     """
-    # TODO Your code here
     if np.random.random() < epsilon:
         action_index = np.random.randint(NUM_ACTIONS)
         object_index = np.random.randint(NUM_OBJECTS)
@@ -46,10 +43,6 @@ def epsilon_greedy(state_1, state_2, q_func, epsilon):
     return (action_index, object_index)
 
 
-# pragma: coderesponse end
-
-
-# pragma: coderesponse template
 def tabular_q_learning(q_func, current_state_1, current_state_2, action_index,
                        object_index, reward, next_state_1, next_state_2,
                        terminal):
@@ -67,7 +60,6 @@ def tabular_q_learning(q_func, current_state_1, current_state_2, action_index,
     Returns:
         None
     """
-    # TODO Your code here
     q_func[current_state_1, current_state_2, action_index, object_index] += (
     ALPHA * (reward + GAMMA * np.max(q_func[next_state_1, next_state_2, :, :])
              - q_func[current_state_1, current_state_2, action_index, object_index])
@@ -75,10 +67,7 @@ def tabular_q_learning(q_func, current_state_1, current_state_2, action_index,
     return None  # This function shouldn't return anything
 
 
-# pragma: coderesponse end
 
-
-# pragma: coderesponse template
 def run_episode(for_training):
     """ Runs one episode
     If for training, update Q function
@@ -95,14 +84,10 @@ def run_episode(for_training):
     epi_reward = 0
     step= 0
     # initialize for each episode
-    # TODO Your code here
-
     (current_room_desc, current_quest_desc, terminal) = framework.newGame()
 
     while not terminal:
         # Choose next action and execute
-        # TODO Your code here
-
         # look up state indices from dictionaries
         current_state_1 = dict_room_desc[current_room_desc]
         current_state_2 = dict_quest_desc[current_quest_desc]
@@ -121,21 +106,16 @@ def run_episode(for_training):
 
         if for_training:
             # update Q-function.
-            # TODO Your code here
             tabular_q_learning(q_func, current_state_1, current_state_2,
                                 action_index, object_index, reward,
                                 next_state_1, next_state_2, terminal)
             
-
         if not for_training:
             # update reward
-            # TODO Your code here
             epi_reward += (GAMMA ** step) * reward
             step += 1
             
-
         # prepare next step
-        # TODO Your code here
         current_room_desc, current_quest_desc = next_room_desc, next_quest_desc
     if not for_training:
         return epi_reward
